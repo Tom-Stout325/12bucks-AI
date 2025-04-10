@@ -1,0 +1,49 @@
+{% extends 'index.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Transaction Details</h2>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Date</th>
+            <td>{{ transaction.date }}</td>
+        </tr>
+        <tr>
+            <th>Type</th>
+            <td>{{ transaction.trans_type }}</td>
+        </tr>
+        <tr>
+            <th>Category</th>
+            <td>{{ transaction.category }}</td>
+        </tr>
+        <tr>
+            <th>Subcategory</th>
+            <td>{{ transaction.sub_cat }}</td>
+        </tr>
+        <tr>
+            <th>Amount</th>
+            <td>$ {{ transaction.amount }}</td>
+        </tr>
+        <tr>
+            <th>Invoice #</th>
+            <td>{{ transaction.invoice_numb }}</td>
+        </tr>
+        <tr>
+            <th>Paid</th>
+            <td>{{ transaction.paid }}</td>
+        </tr>
+        <tr>
+            <th>Team</th>
+            <td>{{ transaction.team }}</td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td>{{ transaction.transaction }}</td>
+        </tr>
+    </table>
+
+    <a href="{% url 'transactions' %}" class="btn btn-secondary">Back to Transactions</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+Base requirements.txt:
+
+asgiref
+beautifulsoup4
+Brotli
+cffi
+crispy-bootstrap5
+cssselect2
+Django==4.2.20
+django-bootstrap-v5
+django-crispy-forms
+django-environ
+django-jazzmin
+fontawesomefree
+fonttools
+pillow
+psycopg2-binary
+pycparser
+pydyf
+pyphen
+soupsieve
+sqlparse
+tinycss2
+tinyhtml5
+typing_extensions
+weasyprint
+webencodings
+whitenoise
+zopfli
+
+
+
+
+
+***********************
+
+Create GitHub 
+Update for production

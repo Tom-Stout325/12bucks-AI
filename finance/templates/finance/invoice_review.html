@@ -1,0 +1,77 @@
+{% extends "index.html" %}
+{% load l10n %}
+{% load humanize %}
+
+
+<head>
+  {% block title %}{{ invoice.invoice_numb }}{% endblock %}
+<style>
+  h4 {
+    font-size: 5vw; /* 5% of the viewport width */
+  }
+  
+</style>
+</head>
+
+{% block content %}
+<div class="container d-flex justify-content-center">
+  <div class="p-5 bg-light border rounded">
+    <h2 class="text-center pb-3">Invoice #: {{ invoice.invoice_numb }}</h2>
+    <h4 class="invoice-header">Client: {{ invoice.client }}</h4>
+    <h4 class="invoice-header">Event: {{ invoice.event }}</h4>
+    <h4 class="invoice-header">Service: {{ invoice.service }}</h4>
+    <h4 class="invoice-header">Invoice Amount: $ {{ invoice.amount|floatformat:2|intcomma }}</h4>
+    <hr>
+    <h3 class="text-center">Expenses</h3>
+    <table class="table table-responsive">
+      <!-- Table content -->
+    </table>
+    <a href="{% url 'invoice_list' %}" class="btn btn-primary btn-sm">Back to Invoices</a>
+  </div>
+</div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Sub-Category</th>
+            <th>Amount</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr>
+            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.category }}</td>
+            <td>{{ transaction.sub_cat }}</td>
+            <td>$ {{ transaction.amount }}</td>
+            <td>
+              <a href="{% url 'transaction_detail_page' transaction.id %}"> <i class="fa-solid fa-eye"></i></a>
+              <a href="{% url 'edit_transaction' transaction.id %}"><i class="fa-solid fa-pencil"></i></a>
+              <a href="{% url 'delete_transaction' transaction.id %}?next={{ request.path }}"><i class="fa-solid fa-trash-can"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="text-end"><strong>Invoice Amount:</strong></td>
+            <td><strong>$ {{ invoice_amount|floatformat:2|intcomma }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-end"><strong>Total Expenses:</strong></td>
+            <td><strong>-$ {{ total_expenses|floatformat:2|intcomma }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-end"><strong>Net Amount:</strong></td>
+            <td><strong>$ {{ net_amount|floatformat:2|intcomma }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <a href="{% url 'invoice_list' %}" class="btn btn-primary btn-sm">Back to Invoices</a>
+  </div>
+</div>
+{% endblock %}
