@@ -5,8 +5,6 @@ from .views import *
 
 
 urlpatterns = [
-  
-
   path('dashboard', Dashboard.as_view(), name="dashboard"),
 
   path('transactions', Transactions.as_view(), name="transactions"),
@@ -20,10 +18,10 @@ urlpatterns = [
   path('invoices/', InvoiceListView.as_view(), name='invoice_list'),
   path('invoice/<int:pk>/review/', invoice_review, name='invoice_review'),
   path('invoice/<int:pk>/', InvoiceDetailView.as_view(), name='invoice_detail'),
-  path('invoice/new', add_invoice, name="add_invoice"),
+  path('invoice/new', create_invoice, name="create_invoice"),
   path('unpaid-invoices/', unpaid_invoices, name="unpaid_invoices"),
-  path('invoice/edit/<int:pk>/', InvoiceUpdateView.as_view(), name='invoice_edit'),
-  path('invoice/success', add_invoice_success, name='add_invoice_success'),    
+  path('invoice/edit/<int:pk>/', update_invoice, name='update_invoice'),
+  path('invoice/success', create_invoice_success, name='create_invoice_success'),    
   path('invoice/<int:invoice_id>/email/', send_invoice_email, name='send_invoice_email'),
 
   path('categories/', CategoryListView.as_view(), name='category_list'),

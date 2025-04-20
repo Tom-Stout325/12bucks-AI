@@ -24,8 +24,6 @@ from .forms import *
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -106,7 +104,7 @@ class Dashboard(ListView):
 
 # Transactions   =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-class Transactions(LoginRequiredMixin,ListView):
+class Transactions(ListView):
     model = Transaction
     template_name = "finance/transactions.html"
     paginate_by = 50
@@ -136,7 +134,7 @@ class Transactions(LoginRequiredMixin,ListView):
     context_object_name = "transactions"
 
 
-@login_required
+
 def download_transactions(request):
     year = request.GET.get('year')
     trans_type = request.GET.get('type')
@@ -166,7 +164,7 @@ def download_transactions(request):
     return response
 
 
-@login_required
+
 def add_transaction(request):
     if request.method == "POST":
         form = TransForm(request.POST, request.FILES)
@@ -182,22 +180,16 @@ def add_transaction(request):
     return render(request, 'finance/transaction_add.html', {'form': form})
 
 
-
-@login_required
 def add_transaction_success(request):
     return render(request, 'finance/transaction_add_success.html')
 
 
-@login_required
 def transaction_detail_page(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk)
     return render(request, 'finance/transactions_detail_view.html', {'transaction': transaction})
 
 
-
-
-
-class TransactionDeleteView(LoginRequiredMixin, DeleteView):
+class TransactionDeleteView(DeleteView):
     model = Transaction
     template_name = "finance/transaction_confirm_delete.html"
 
@@ -212,7 +204,6 @@ class TransactionDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-@login_required
 def edit_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
     if request.method == 'POST':
@@ -231,31 +222,70 @@ def edit_transaction(request, transaction_id):
 
 # Invoices   =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-@login_required
-def add_invoice(request):
-    if request.method == "POST":
+def create_invoice(request):
+    if request.method == 'POST':
         form = InvoiceForm(request.POST)
-        if form.is_valid():
+        formset = InvoiceItemFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
             invoice = form.save(commit=False)
-            if not invoice.paid:
-                invoice.paid = "No"
+            invoice.amount = 0  # placeholder
             invoice.save()
-            messages.success(request, 'Invoice added successfully!')
-            return redirect('add_invoice_success')
-        else:
-            messages.error(request, 'Error adding invoice. Please check the form.')
-            logger.error(f"Form errors: {form.errors}")
+
+            items = formset.save(commit=False)
+            for item in items:
+                item.invoice = invoice
+                item.save()
+
+            invoice.amount = invoice.calculate_total()
+            invoice.save()
+
+            messages.success(request, f"Invoice #{invoice.invoice_numb} created successfully.")
+            return redirect('invoice_list')
     else:
-        form = InvoiceForm(initial={'paid': 'No'})
-    return render(request, 'finance/invoice_add_or_edit.html', {'form': form})
+        form = InvoiceForm()
+        formset = InvoiceItemFormSet()
+
+    return render(request, 'finance/invoice_add.html', {
+        'form': form,
+        'formset': formset
+    })
 
 
-@login_required
-def add_invoice_success(request):
+def update_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST, instance=invoice)
+        formset = InvoiceItemFormSet(request.POST, instance=invoice)
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+
+            invoice.amount = invoice.calculate_total()
+            invoice.save()
+            messages.success(request, f"Invoice # {invoice.invoice_numb} Updated successfully.")
+            return redirect('invoice_list')
+        else:
+            print("FORM ERRORS:", form.errors)
+            print("FORMSET ERRORS:", formset.errors)
+    else:
+        form = InvoiceForm(instance=invoice)
+        formset = InvoiceItemFormSet(instance=invoice)
+
+    return render(request, 'finance/invoice_edit.html', {
+        'form': form,
+        'formset': formset,
+        'invoice': invoice
+    })
+
+
+def create_invoice_success(request):
     return render(request, 'finance/invoice_add_success.html')
 
 
-class InvoiceListView(LoginRequiredMixin, ListView):
+class InvoiceListView(ListView):
     model = Invoice
     template_name = "finance/invoices.html"
     context_object_name = "invoices"
@@ -273,7 +303,7 @@ class InvoiceListView(LoginRequiredMixin, ListView):
         return queryset
 
 
-class InvoiceDetailView(LoginRequiredMixin, DetailView):
+class InvoiceDetailView(DetailView):
     model = Invoice
     template_name = 'finance/invoice_detail.html'
     context_object_name = 'invoice'
@@ -289,18 +319,7 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
-    model = Invoice
-    form_class = InvoiceForm
-    template_name = 'finance/invoice_edit.html'
-    success_url = reverse_lazy('invoice_list')
 
-    def form_valid(self, form):
-        messages.success(self.request, "Invoice updated successfully!")
-        return super().form_valid(form)
-
-
-@login_required
 def invoice_review(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     transactions = Transaction.objects.filter(invoice_numb=invoice.invoice_numb)
@@ -317,7 +336,7 @@ def invoice_review(request, pk):
     })
 
 
-@login_required
+
 def unpaid_invoices(request):
     invoices = Invoice.objects.filter(paid__iexact="No").order_by('due_date')
     return render(request, 'components/unpaid_invoices.html', {'invoices': invoices})
@@ -325,14 +344,14 @@ def unpaid_invoices(request):
 
 # Categories    =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-class CategoryListView(LoginRequiredMixin, ListView):
+class CategoryListView(ListView):
     model = Category
     template_name = "components/category_list.html"
     context_object_name = "categories"
     ordering = ['category']
 
 
-class CategoryCreateView(LoginRequiredMixin, CreateView):
+class CategoryCreateView(CreateView):
     model = Category 
     form_class = CategoryForm
     template_name = "components/category_form.html"
@@ -343,7 +362,7 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+class CategoryUpdateView(UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = "components/category_form.html"
@@ -354,7 +373,7 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CategoryDeleteView(LoginRequiredMixin, DeleteView):
+class CategoryDeleteView(DeleteView):
     model = Category
     template_name = "components/category_confirm_delete.html"
     success_url = reverse_lazy('category_list')
@@ -366,7 +385,7 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
 
 # Sub-Categories  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-class SubCategoryListView(LoginRequiredMixin, ListView):
+class SubCategoryListView(ListView):
     model = SubCategory
     template_name = "finance/sub_category_list.html"
     context_object_name = "sub_cat"
@@ -375,7 +394,7 @@ class SubCategoryListView(LoginRequiredMixin, ListView):
         return SubCategory.objects.order_by('sub_cat')
 
 
-class SubCategoryCreateView(LoginRequiredMixin,CreateView):
+class SubCategoryCreateView(CreateView):
     model = SubCategory
     form_class = SubCategoryForm
     template_name = "components/sub_category_form.html"
@@ -386,7 +405,7 @@ class SubCategoryCreateView(LoginRequiredMixin,CreateView):
         return super().form_valid(form)
 
 
-class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
+class SubCategoryUpdateView(UpdateView):
     model = SubCategory
     form_class = SubCategoryForm
     template_name = "components/sub_category_form.html"
@@ -398,7 +417,7 @@ class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class SubCategoryDeleteView(LoginRequiredMixin, DeleteView):
+class SubCategoryDeleteView(DeleteView):
     model = SubCategory
     template_name = "components/sub_category_confirm_delete.html"
     success_url = reverse_lazy('sub_category_list')
@@ -410,14 +429,14 @@ class SubCategoryDeleteView(LoginRequiredMixin, DeleteView):
 
 # Clients   =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-class ClientListView(LoginRequiredMixin, ListView):
+class ClientListView(ListView):
     model = Client
     template_name = "components/client_list.html"
     context_object_name = "clients"
     ordering = ['business']
 
 
-class ClientCreateView(LoginRequiredMixin, CreateView):
+class ClientCreateView(CreateView):
     model = Client
     form_class = ClientForm
     template_name = "components/client_form.html"
@@ -428,7 +447,7 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClientUpdateView(LoginRequiredMixin, UpdateView):
+class ClientUpdateView(UpdateView):
     model = Client
     form_class = ClientForm
     template_name = "components/client_form.html"
@@ -439,7 +458,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ClientDeleteView(LoginRequiredMixin, DeleteView):
+class ClientDeleteView(DeleteView):
     model = Client
     template_name = "components/client_confirm_delete.html"
     success_url = reverse_lazy('client_list')
@@ -451,7 +470,7 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
 
 # Financial Reports  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-@login_required
+
 def get_summary_data(transactions, year):
     if year:
         transactions = transactions.filter(date__year=year)
@@ -482,7 +501,7 @@ def get_summary_data(transactions, year):
         'net_profit': net_profit
     }
 
-@login_required
+
 def financial_statement(request):
     current_year = timezone.now().year
     year = request.GET.get('year', str(current_year))
@@ -505,7 +524,7 @@ def financial_statement(request):
         'available_years': available_years,
     })
 
-@login_required
+
 def print_category_summary(request):
     year = request.GET.get('year')
     transactions = Transaction.objects.select_related('trans_type', 'category', 'sub_cat')
@@ -513,7 +532,7 @@ def print_category_summary(request):
     return render(request, 'finance/category_summary_print.html', context)
 
 
-@login_required
+
 def category_summary(request):
     year = request.GET.get('year', str(timezone.now().year))
     transactions = Transaction.objects.select_related('trans_type', 'category', 'sub_cat')
@@ -522,7 +541,7 @@ def category_summary(request):
     return render(request, 'finance/category_summary.html', context)
 
 
-@login_required
+
 def keyword_financial_summary(request):
     current_year = timezone.now().year
     years = [current_year, current_year - 1, current_year - 2]
@@ -560,7 +579,7 @@ def keyword_financial_summary(request):
 
 
 @require_POST
-@login_required
+
 def send_invoice_email(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     html_string = render_to_string('finance/invoice_detail.html', {'invoice': invoice})

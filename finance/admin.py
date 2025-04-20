@@ -13,6 +13,9 @@ class TransactionAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     list_display    = ['name', 'date']
     
+
+admin.site.register(InvoiceItem)
+admin.site.register(MileageRate)
 admin.site.register(Client)
 admin.site.register(Keyword)
 admin.site.register(Type)

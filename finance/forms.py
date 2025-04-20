@@ -1,17 +1,15 @@
 from django import forms
+from django.forms import inlineformset_factory
 from .models import *
 
 
-class AddInvoiceItemForm(forms.Form):
-	invoice_number = forms.CharField()
-	item           = forms.CharField()
-	price          = forms.DecimalField(decimal_places=2)
-	qty            = forms.IntegerField()
+# class AddInvoiceItemForm(forms.Form):
+# 	invoice_number = forms.CharField()
+# 	item           = forms.CharField()
+# 	price          = forms.DecimalField(decimal_places=2)
+# 	qty            = forms.IntegerField()
 
 
-
-
-# forms.py
 class TransForm(forms.ModelForm):
     keyword = forms.ModelChoiceField(
         queryset=Keyword.objects.all(),
@@ -38,12 +36,28 @@ class TransForm(forms.ModelForm):
         return receipt
 
 
-class InvoiceForm(forms.ModelForm):
-    keyword = forms.ModelChoiceField(queryset=Keyword.objects.all(), label='Keyword', widget=forms.Select(attrs={'class': 'form-control'}))
 
+
+class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['invoice_numb', 'client', 'event', 'location', 'keyword', 'service', 'amount', 'date', 'due', 'paid']
+        fields = ['invoice_numb', 'client', 'event', 'location', 'keyword', 'service', 'date', 'due', 'paid']
+
+
+class InvoiceItemForm(forms.ModelForm):
+    class Meta:
+        model = InvoiceItem
+        fields = ['item', 'qty', 'price']
+
+
+InvoiceItemFormSet = inlineformset_factory(
+    Invoice,
+    InvoiceItem,
+    form=InvoiceItemForm,
+    extra=5,
+    can_delete=True
+)
+
 
 
 class CategoryForm(forms.ModelForm):

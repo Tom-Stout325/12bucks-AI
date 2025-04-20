@@ -106,43 +106,35 @@ class Transaction(models.Model):
     
 
 class Invoice(models.Model):
-    invoice_numb = models.CharField(max_length=10, unique=True)
-    client = models.ForeignKey(Client, on_delete=models.PROTECT)
-    event = models.CharField(max_length=500, blank=True, null=True)
-    location = models.CharField(max_length=500, blank=True, null=True)
-    keyword = models.ForeignKey(Keyword, on_delete=models.PROTECT, default=1)
-    service = models.ForeignKey(Service, on_delete=models.PROTECT)
-    amount = models.DecimalField(default=0.00, max_digits=100, decimal_places=2)
-    date = models.DateField()
-    due = models.DateField()
-    paid = models.CharField(max_length=100, blank=True, null=True, default="No")
+    invoice_numb         = models.CharField(max_length=10, unique=True)
+    client               = models.ForeignKey(Client, on_delete=models.PROTECT)
+    event                = models.CharField(max_length=500, blank=True, null=True)
+    location             = models.CharField(max_length=500, blank=True, null=True)
+    keyword              = models.ForeignKey(Keyword, on_delete=models.PROTECT, default=1)
+    service              = models.ForeignKey(Service, on_delete=models.PROTECT)
+    amount               = models.DecimalField(default=0.00, max_digits=100, decimal_places=2)   
+    date                 = models.DateField(auto_now=False, auto_now_add=False)
+    due                  = models.DateField(auto_now=False, auto_now_add=False)
+    paid                 = models.CharField(max_length=100, blank=True, null=True, default="No")
 
     class Meta:
+        verbose_name_plural = "Invoices"
         ordering = ['invoice_numb']
 
     def __str__(self):
         return self.invoice_numb
 
-    def calculate_total(self):
-        return sum(item.total for item in self.items.all())
-
 # -------------------------------------------------------------------------------------------
 
 
 class InvoiceItem(models.Model):
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, related_name='items')
-    item = models.ForeignKey(Service, on_delete=models.PROTECT)
-    qty = models.IntegerField(default=0)
-    price = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
-
+    invoice_numb    = models.CharField(max_length=500, blank=True, null=True)
+    item            = models.ForeignKey(Service, on_delete=models.PROTECT) 
+    qty             = models.IntegerField(blank=True, null=True, default='1')
+    price           = models.DecimalField(max_digits=20, decimal_places=2, blank=False, default="100.00")
+     
     def __str__(self):
         return f"{self.item.service} - {self.qty} x {self.price}"
-
-    @property
-    def total(self):
-        return (self.qty or 0) * (self.price or 0)
-
-
 
 
  # -------------------------------------------------------------------------------------------

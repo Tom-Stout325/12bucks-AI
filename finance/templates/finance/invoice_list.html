@@ -26,7 +26,7 @@
           </form>
       </div>
       <div class="col-lg-4 col-md-2 col-12 mt-3 mt-md-0 text-center">
-          <a href="{% url 'add_invoice' %}" class="btn btn-info w-100">
+          <a href="{% url 'create_invoice' %}" class="btn btn-info w-100">
               <i class="fas fa-plus"></i> Create A New Invoice
           </a>
       </div>
@@ -65,7 +65,7 @@
           <td>
             <a href="{% url 'invoice_detail' invoice.pk %}"><i class="fa-solid fa-eye"></i>&nbsp;</a>
         
-            <a href="{% url 'invoice_edit' invoice.pk %}"><i "class=fa-solid fa-pencil"></i>&nbsp;</a>
+            <a href="{% url 'update_invoice' invoice.pk %}"><i class="fa-solid fa-pencil"></i>&nbsp;</a>
          
             <a href="{% url 'invoice_review' invoice.pk %}"><i class="fa-regular fa-file"></i>&nbsp;</a>
           
