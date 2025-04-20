@@ -3,12 +3,6 @@ from django.forms import inlineformset_factory
 from .models import *
 
 
-# class AddInvoiceItemForm(forms.Form):
-# 	invoice_number = forms.CharField()
-# 	item           = forms.CharField()
-# 	price          = forms.DecimalField(decimal_places=2)
-# 	qty            = forms.IntegerField()
-
 
 class TransForm(forms.ModelForm):
     keyword = forms.ModelChoiceField(
@@ -36,8 +30,6 @@ class TransForm(forms.ModelForm):
         return receipt
 
 
-
-
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
@@ -57,7 +49,6 @@ InvoiceItemFormSet = inlineformset_factory(
     extra=5,
     can_delete=True
 )
-
 
 
 class CategoryForm(forms.ModelForm):
@@ -92,8 +83,7 @@ class MileageForm(forms.ModelForm):
             'job': forms.TextInput(attrs={'class': 'form-control'}),
             'vehicle': forms.TextInput(attrs={'class': 'form-control'}),
             'mileage_type': forms.Select(attrs={'class': 'form-control'}),
-        }
-        
+        }      
 
 
 class MileageRateForm(forms.ModelForm):
