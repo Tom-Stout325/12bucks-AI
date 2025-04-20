@@ -1,49 +1,52 @@
-{% extends 'index.html' %}
+{% extends "index.html" %}
+{% load static %}
+
 {% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm p-4">
+    <h2 class="mb-4">Transaction Detail</h2>
 
-<div class="container mt-4">
-    <h2>Transaction Details</h2>
+    <dl class="row">
+      <dt class="col-sm-3">Date</dt>
+      <dd class="col-sm-9">{{ transaction.date }}</dd>
 
-    <table class="table table-bordered">
-        <tr>
-            <th>Date</th>
-            <td>{{ transaction.date }}</td>
-        </tr>
-        <tr>
-            <th>Type</th>
-            <td>{{ transaction.trans_type }}</td>
-        </tr>
-        <tr>
-            <th>Category</th>
-            <td>{{ transaction.category }}</td>
-        </tr>
-        <tr>
-            <th>Subcategory</th>
-            <td>{{ transaction.sub_cat }}</td>
-        </tr>
-        <tr>
-            <th>Amount</th>
-            <td>$ {{ transaction.amount }}</td>
-        </tr>
-        <tr>
-            <th>Invoice #</th>
-            <td>{{ transaction.invoice_numb }}</td>
-        </tr>
-        <tr>
-            <th>Paid</th>
-            <td>{{ transaction.paid }}</td>
-        </tr>
-        <tr>
-            <th>Team</th>
-            <td>{{ transaction.team }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ transaction.transaction }}</td>
-        </tr>
-    </table>
+      <dt class="col-sm-3">Description</dt>
+      <dd class="col-sm-9">{{ transaction.description }}</dd>
 
-    <a href="{% url 'transactions' %}" class="btn btn-secondary">Back to Transactions</a>
+      <dt class="col-sm-3">Amount</dt>
+      <dd class="col-sm-9">${{ transaction.amount }}</dd>
+
+      <dt class="col-sm-3">Type</dt>
+      <dd class="col-sm-9">{{ transaction.type.name }}</dd>
+
+      <dt class="col-sm-3">Category</dt>
+      <dd class="col-sm-9">{{ transaction.category.name }}</dd>
+
+      {% if transaction.subcategory %}
+        <dt class="col-sm-3">Subcategory</dt>
+        <dd class="col-sm-9">{{ transaction.subcategory.name }}</dd>
+      {% endif %}
+
+      {% if transaction.notes %}
+        <dt class="col-sm-3">Notes</dt>
+        <dd class="col-sm-9">{{ transaction.notes }}</dd>
+      {% endif %}
+
+      {% if transaction.receipt %}
+        <dt class="col-sm-3">Receipt</dt>
+        <dd class="col-sm-9">
+          {% if receipt_type == "pdf" %}
+            <a href="{{ transaction.receipt.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+              View PDF Receipt
+            </a>
+          {% elif receipt_type == "image" %}
+            <img src="{{ transaction.receipt.url }}" alt="Receipt Image" class="img-fluid mt-2 rounded border">
+          {% endif %}
+        </dd>
+      {% endif %}
+    </dl>
+
+    <a href="{% url 'transactions' %}" class="btn btn-secondary mt-4">Back to Transactions</a>
+  </div>
 </div>
-
 {% endblock %}

@@ -35,7 +35,14 @@
           <h4>{{ details.paid }}</h4>
           <h4>{{ details.team }}</h4>
           <h4>{{ details.transaction }}</h4>
-          <h4>{{ details.receipt }}</h4>
+          {% if transaction.receipt %}
+            <h3>Receipt</h3>
+            <p>{{ transaction.receipt.notes }}</p>
+            <img src="{{ transaction.receipt.image.url }}" alt="Receipt Image" style="max-width: 400px;">
+          {% else %}    
+            <p>No Receipt</p>
+          {% endif %}
+
         </div>
       </div>
     </div>

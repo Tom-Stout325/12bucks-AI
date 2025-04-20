@@ -88,9 +88,9 @@ class Transaction(models.Model):
     paid           = models.CharField(max_length=500, blank=True, null=True, default="No")
     team           = models.ForeignKey('Team', null=True, on_delete=models.PROTECT)
     transaction    = models.CharField(max_length=500, blank=True, null=True)
-    receipt        = models.CharField(max_length=500, blank=True, null=True)
     tax            = models.CharField(max_length=500, blank=True, null=True, default="Yes")
     keyword        = models.ForeignKey(Keyword, on_delete=models.PROTECT, default=1)
+    receipt        = models.FileField(upload_to='receipts/', blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Transactions"
@@ -98,6 +98,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.transaction
+
     
 
     
@@ -157,23 +158,17 @@ class Miles(models.Model):
         ('Reimbursed', 'Reimbursed'),
     ]
 
-    date = models.DateField()
-    begin = models.DecimalField(max_digits=10, decimal_places=1, null=True, validators=[MinValueValidator(0)])
-    end = models.DecimalField(max_digits=10, decimal_places=1, null=True, validators=[MinValueValidator(0)])
-    total = models.DecimalField(max_digits=10, decimal_places=1, null=True, editable=False)
+    date             = models.DateField()
+    begin            = models.DecimalField(max_digits=10, decimal_places=1, null=True, validators=[MinValueValidator(0)])
+    end              = models.DecimalField(max_digits=10, decimal_places=1, null=True, validators=[MinValueValidator(0)])
+    total            = models.DecimalField(max_digits=10, decimal_places=1, null=True, editable=False)
+    client           = models.ForeignKey('Client', on_delete=models.PROTECT)
+    invoice          = models.CharField(max_length=255, blank=True, null=True)
+    tax              = models.CharField(max_length=10, blank=False, null=True, default="Yes")
+    job              = models.CharField(max_length=255, blank=True, null=True)
+    vehicle          = models.CharField(max_length=255, blank=False, null=True, default="Lead Foot")
 
-    client = models.ForeignKey('Client', on_delete=models.PROTECT)
-    invoice = models.CharField(max_length=255, blank=True, null=True)
-
-    tax = models.CharField(max_length=10, blank=False, null=True, default="Yes")
-    job = models.CharField(max_length=255, blank=True, null=True)
-    vehicle = models.CharField(max_length=255, blank=False, null=True, default="Lead Foot")
-
-    mileage_type = models.CharField(
-        max_length=20,
-        choices=MILEAGE_TYPE_CHOICES,
-        default='Taxable'
-    )
+    mileage_type = models.CharField(max_length=20, choices=MILEAGE_TYPE_CHOICES, default='Taxable')
 
     class Meta:
         verbose_name_plural = "Miles"
@@ -189,4 +184,7 @@ class Miles(models.Model):
         else:
             self.total = None
         super().save(*args, **kwargs)
+
+
+
 

@@ -79,9 +79,10 @@
             <td><strong>${{ x.amount|floatformat:2|intcomma }}</strong></td>
             <td>{{ x.invoice_numb }}</td>
             <td>
-              <a href="#" class="view-transaction text-decoration-none " data-id="{{ x.id }}">
+              <a href="{% url 'transaction_detail' x.id %}">
                 <i class="fa-solid fa-eye text-success"></i>
-              </a>
+            </a>
+               
             </td>
             <td>
               <a href="{% url 'edit_transaction' x.id %}" class="text-decoration-none">
@@ -115,8 +116,10 @@
                 <strong>Amount:</strong> $ {{ x.amount|floatformat:2|intcomma }}<br>
                 <strong>Invoice #:</strong> {{ x.invoice_numb }}<br>
                 <div class="mt-2">
+                  <a href="{% url 'transaction_detail' x.id %}" class="btn btn-sm btn-outline-primary">View</a>
+
+                  
                   <a href="{% url 'edit_transaction' x.id %}" class="btn btn-sm btn-warning">Edit</a>
-                  <a href="#" class="btn btn-sm btn-outline-primary view-transaction" data-id="{{ x.id }}">View</a>
                 </div>
               </div>
             </div>
@@ -147,9 +150,7 @@
     </div>
   </div>
 
-  <!-- Modal for Transaction Detail -->
-  <div id="modalContainer"></div>
-</div>
+
 
 <script>
   function sortTable(col) {
@@ -181,25 +182,5 @@
   }
 </script>
 
-<script>
-  $(document).ready(function () {
-    $(".view-transaction").click(function (e) {
-      e.preventDefault();
-      var transactionId = $(this).data("id");
-      $.ajax({
-        url: "{% url 'transaction_detail' %}",
-        type: "GET",
-        data: { id: transactionId },
-        success: function (data) {
-          $("#modalContainer").html(data);
-          var modal = new bootstrap.Modal(document.getElementById("dtlModal"));
-          modal.show();
-        },
-        error: function (xhr, status, error) {
-          console.error("AJAX Error:", error);
-        },
-      });
-    });
-  });
-</script>
+
 {% endblock %}

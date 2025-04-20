@@ -31,8 +31,3 @@ zopfli
 
 
 
-
-***********************
-
-Create GitHub 
-Update for production

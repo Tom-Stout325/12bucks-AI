@@ -10,8 +10,7 @@ urlpatterns = [
   path('dashboard', Dashboard.as_view(), name="dashboard"),
 
   path('transactions', Transactions.as_view(), name="transactions"),
-  path('transaction-detail/', transaction_detail, name='transaction_detail'),
-  path('transaction/<int:transaction_id>/', transaction_detail_page, name='transaction_detail_page'),
+  path('transaction/<int:pk>/', transaction_detail_page, name='transaction_detail'),
   path('transaction/new', add_transaction, name="add_transaction"),
   path('transaction/success', add_transaction_success, name='add_transaction_success'),    
   path('transaction/delete/<int:pk>/', TransactionDeleteView.as_view(), name='delete_transaction'),
@@ -52,10 +51,5 @@ urlpatterns = [
   path('mileage/<int:pk>/edit/', MileageUpdateView.as_view(), name='mileage_update'),
   path('mileage/<int:pk>/delete/', MileageDeleteView.as_view(), name='mileage_delete'),
   path('mileage/update-rate/', update_mileage_rate, name='update_mileage_rate'),
+  
 ]
-
-
-
-
-
-

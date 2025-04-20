@@ -109,7 +109,6 @@ class Dashboard(ListView):
 class Transactions(LoginRequiredMixin,ListView):
     model = Transaction
     template_name = "finance/transactions.html"
-    context_object_name = "transactions"
     paginate_by = 50
 
     def get_queryset(self):
@@ -134,6 +133,7 @@ class Transactions(LoginRequiredMixin,ListView):
             'selected_type': self.request.GET.get('type', '')
         })
         return context
+    context_object_name = "transactions"
 
 
 @login_required
@@ -169,7 +169,7 @@ def download_transactions(request):
 @login_required
 def add_transaction(request):
     if request.method == "POST":
-        form = TransForm(request.POST)
+        form = TransForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Transaction added successfully!')
@@ -182,24 +182,19 @@ def add_transaction(request):
     return render(request, 'finance/transaction_add.html', {'form': form})
 
 
+
 @login_required
 def add_transaction_success(request):
     return render(request, 'finance/transaction_add_success.html')
 
 
 @login_required
-def transaction_detail_page(request, transaction_id):
-    transaction = get_object_or_404(Transaction, id=transaction_id)
-    return render(request, "finance/transactions_detail_view.html", {"transaction": transaction})
+def transaction_detail_page(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    return render(request, 'finance/transactions_detail_view.html', {'transaction': transaction})
 
 
-@login_required
-def transaction_detail(request):
-    transaction_id = request.GET.get("id")
-    if not transaction_id:
-        return JsonResponse({"error": "Transaction ID is missing"}, status=400)
-    transaction = get_object_or_404(Transaction, id=transaction_id)
-    return render(request, "components/transaction_modal.html", {"transaction": transaction})
+
 
 
 class TransactionDeleteView(LoginRequiredMixin, DeleteView):
@@ -675,3 +670,6 @@ def update_mileage_rate(request):
         form = MileageRateForm(instance=mileage_rate)
 
     return render(request, 'components/update_mileage_rate.html', {'form': form})
+
+
+

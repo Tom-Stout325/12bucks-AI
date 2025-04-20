@@ -10,6 +10,8 @@ class AddInvoiceItemForm(forms.Form):
 
 
 
+
+# forms.py
 class TransForm(forms.ModelForm):
     keyword = forms.ModelChoiceField(
         queryset=Keyword.objects.all(),
@@ -19,15 +21,25 @@ class TransForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        fields = ('date', 'trans_type', 'category', 'sub_cat', 'amount', 'invoice_numb', 'keyword', 'paid', 'team', 'transaction', 'receipt')
+        fields = (
+            'date', 'trans_type', 'category', 'sub_cat', 'amount', 'invoice_numb',
+            'keyword', 'paid', 'team', 'transaction', 'receipt'
+        )
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean_receipt(self):
+        receipt = self.cleaned_data.get('receipt')
+        if receipt:
+            content_type = receipt.content_type
+            if content_type not in ['application/pdf', 'image/jpeg', 'image/png']:
+                raise forms.ValidationError("Only PDF, JPG, or PNG files are allowed.")
+        return receipt
 
 
 class InvoiceForm(forms.ModelForm):
-    keyword = forms.ModelChoiceField(
-        queryset=Keyword.objects.all(),
-        label='Keyword',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
+    keyword = forms.ModelChoiceField(queryset=Keyword.objects.all(), label='Keyword', widget=forms.Select(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Invoice
@@ -74,3 +86,6 @@ class MileageRateForm(forms.ModelForm):
     class Meta:
         model = MileageRate
         fields = ['rate']
+
+
+
